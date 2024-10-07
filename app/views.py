@@ -17,7 +17,6 @@ import cv2
 from django.core.files.storage import default_storage
 
 
-# Home view for login
 def home(request, token=0):
     if request.method == 'POST':
         username = request.POST['username']
@@ -35,7 +34,6 @@ def home(request, token=0):
         return render(request, 'login.html')
 
 
-# Register user view
 def register_user(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST, request.FILES)
@@ -47,7 +45,7 @@ def register_user(request):
                 user_info = UserInfo.objects.create(user=user, image_field=face_photo)
 
                 try:
-                    img_path = default_storage.path(user_info.image_field.name)  # Full path to the image
+                    img_path = default_storage.path(user_info.image_field.name)
                     face_image = detect_and_crop_face(img_path)
                     resized_image_path = resize_face_image(face_image)
 
@@ -96,10 +94,9 @@ def compare_face_with_camera(stored_vector_str):
     cleaned_vector_str = stored_vector_str.strip('[]')
     stored_face_vector = np.array(list(map(float, cleaned_vector_str.split(','))))
     distance = compare_vectors(new_face_vector, stored_face_vector)
-    if distance < 5 :
-        if distance > 1:
-            print("Faces match!")
-            return True
+    if distance > 1 and distance < 5:
+        print("Faces match!")
+        return True
     else:
         print("Faces do not match.")
         return False
@@ -126,15 +123,13 @@ def detect_and_crop_face(image_path):
     if len(faces) == 0:
         raise ValueError("No face detected in the image.")
 
-    # Crop the first face found
     for (x, y, w, h) in faces:
         face_image = image[y:y + h, x:x + w]
-        break  # Only use the first detected face
+        break
 
     return face_image
 
 
-# Function to resize the cropped face image
 def resize_face_image(face_image, target_size=(160, 160)):
     resized_face = cv2.resize(face_image, target_size)
     resized_image_path = "resized_face_image.jpg"
@@ -142,7 +137,6 @@ def resize_face_image(face_image, target_size=(160, 160)):
     return resized_image_path
 
 
-# Capture image from camera, detect and crop face, then resize
 def capture_image_from_camera():
     cap = cv2.VideoCapture(0)
     while True:
@@ -155,11 +149,9 @@ def capture_image_from_camera():
     cap.release()
     cv2.destroyAllWindows()
 
-    # Detect face and resize the cropped face
     face_image = detect_and_crop_face(image_path)
     return resize_face_image(face_image)
 
-# Profile view
 @login_required(login_url='home')
 def profile(request):
 
@@ -217,10 +209,8 @@ def id_check_view(request):
 def id_check_compare(request):
     if request.method == 'POST':
         username = request.POST.get('username')
-        captured_image_path = capture_image_from_camera()  # Captures image and returns the path
-
-        match, user = check_id_face_match(username, captured_image_path)  # Pass image path
-
+        captured_image_path = capture_image_from_camera()
+        match, user = check_id_face_match(username, captured_image_path)
         if match:
             messages.success(request, 'Faces match! Access granted to documents.')
             login(request, user)
@@ -234,28 +224,20 @@ def check_id_face_match(username, captured_image_path):
     try:
         user_info = get_object_or_404(UserInfo, user__username=username)
         stored_vector_str = user_info.vector
-        match = compare_face_with_camera_id_check(stored_vector_str, captured_image_path)  # Pass the image path here
+        match = compare_face_with_camera_id_check(stored_vector_str, captured_image_path)
         return match, user_info.user
     except UserInfo.DoesNotExist:
         return False, None
 
 
 def compare_face_with_camera_id_check(stored_vector_str, captured_image_path):
-    # Generate the face vector for the newly captured image
     new_face_vector = DeepFace.represent(img_path=captured_image_path, model_name='Facenet')[0]['embedding']
-
-    # Convert the stored vector string into a NumPy array
     cleaned_vector_str = stored_vector_str.strip('[]')
     stored_face_vector = np.array(list(map(float, cleaned_vector_str.split(','))))
-
-    # Compare the two face vectors
     distance = compare_vectors(new_face_vector, stored_face_vector)
-
-    # Check if the distance is within the threshold to consider a match
-    if distance < 5:
-        if distance > 1:
-            print("Faces match!")
-            return True
+    if distance < 5 and distance > 1:
+        print("Faces match!")
+        return True
     else:
         print("Faces do not match.")
         return False
