@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+<div class="ProfilePage container d-flex flex-column align-items-center mt-5">
+    <div class="profile-picture">
+        <img src="{{ user_info.image_field }}" class="rounded-circle" alt="Profile Picture" onerror="this.src='https://via.placeholder.com/150';">
+    </div>
+
+    <div class="profile-details text-center mt-3">
+        <h2 class="text-info">Profile #{{ user_info.username }}</h2>
+        <p class="text-muted">User ID: {{ user_info.user.id }}</p>
+    </div>
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
+        <div class="container-fluid justify-content-center d-flex w-100">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon justify-content-center"></span>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-center" id="navbarContent">
+                <ul class="navbar-nav text-center">
+                    <li class="nav-item mx-3">
+                         <form method="GET" action="{% url 'profile' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-link btn text-info">Profile</button>
+                        </form>
+                    </li>
+                    <li class="nav-item mx-3">
+                        <form method="GET" action="{% url 'documents' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-link btn text-info">Documents</button>
+                        </form>
+                    </li>
+                    <li class="nav-item mx-3">
+                        <form id="logout-form" action="{% url 'logout' %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-link btn text-info">Logout</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f8f9fa;
+    }
+
+    .ProfilePage {
+        margin-top: 50px;
+    }
+
+    .profile-picture img {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+    }
+
+    .navbar {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        background-color: lightcyan;
+    }
+
+    .nav-link {
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+
+    .nav-link:hover, .nav-link.active {
+        color: #007bff;
+        font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+        .navbar-nav {
+            text-align: center;
+        }
+    }
+
+    button.nav-link.btn {
+        background: none;
+        border: none;
+        padding: 0;
+    }
+
+    button.nav-link.btn:hover {
+        color: #007bff;
+        font-weight: bold;
+    }
+</style>
+</body>
+</html>
